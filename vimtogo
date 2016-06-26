@@ -5,6 +5,13 @@ readonly VIM_AUTOLOAD="$VIM_HOME/autoload"
 readonly VIM_BUNDLE="$VIM_HOME/bundle"
 readonly VIMRC="$HOME/.vimrc"
 
+CURL_CMD="curl -sSL"
+
+sslNoVerify() {
+  CURL_CMD="$CURL_CMD -k"
+  export GIT_SSL_NO_VERIFY=1
+}
+
 msgInfo() {
   local level=$1
   shift
@@ -22,12 +29,16 @@ msgError(){
 
 runInstall() {
 
+  case $1 in
+    "--ssl-no-verify") sslNoVerify ;;
+  esac
+
   msgInfo 0 "Running install"
   [ -d $VIM_BUNDLE ] && msgError "bundle directory found"
 
   msgInfo 1 "Installing pathogen"
   mkdir -p $VIM_AUTOLOAD
-  curl -sSL -o $VIM_AUTOLOAD/pathogen.vim \
+  $CURL_CMD -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
 
   msgInfo 1 "Creating .vimrc file"
@@ -118,8 +129,8 @@ runUpdate() {
 }
 
 case $1 in
-  install) runInstall ;;
-  update) runUpdate ;;
+  install) shift; runInstall $@ ;;
+  update) shift; runUpdate $@ ;;
   *) echo "Usage: $0 [install|update]" ;;  
 esac
 
