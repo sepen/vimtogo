@@ -1,0 +1,126 @@
+#!/bin/bash
+
+readonly VIM_HOME="$HOME/.vim"
+readonly VIM_AUTOLOAD="$VIM_HOME/autoload"
+readonly VIM_BUNDLE="$VIM_HOME/bundle"
+readonly VIMRC="$HOME/.vimrc"
+
+msgInfo() {
+  local level=$1
+  shift
+  case $level in
+    0) echo "===> $@" ;;
+    1) echo "-> $@ " ;;
+    2) echo "+ $@" ;;
+  esac
+}
+
+msgError(){
+  echo "ERROR: $@"
+  exit 1
+}	
+
+runInstall() {
+
+  msgInfo 0 "Running install"
+  [ -d $VIM_BUNDLE ] && msgError "bundle directory found"
+
+  msgInfo 1 "Installing pathogen"
+  mkdir -p $VIM_AUTOLOAD
+  curl -sSL -o $VIM_AUTOLOAD/pathogen.vim \
+    https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
+
+  msgInfo 1 "Creating .vimrc file"
+  cat > $VIMRC << __EOF__
+""" general settings
+syntax on
+filetype plugin indent on
+set nocompatible
+set encoding=utf-8
+set number
+set cursorline
+set cursorcolumn
+set background=dark
+set laststatus=2
+set title
+set colorcolumn=80
+set expandtab
+set tabstop=2
+set shiftwidth=2
+""" pathogen
+execute pathogen#infect()
+call pathogen#helptags()
+__EOF__
+
+  msgInfo 1 "Installing plugins"
+  mkdir -p $VIM_BUNDLE
+
+  # TODO: load a list of plugins from a file, easy to maintain
+  msgInfo 2 "jellybeans"
+  git clone https://github.com/nanotech/jellybeans.vim \
+    $VIM_BUNDLE/jellybeans
+  cat >> $VIMRC << __EOF__
+""" jellybeans
+colorscheme jellybeans
+__EOF__
+ 
+  msgInfo 2 "molokai"
+  git clone https://github.com/tomasr/molokai \
+    $VIM_BUNDLE/molokai
+  cat >> $VIMRC << __EOF__
+""" molokai
+"colorscheme molokai
+"let g:molokai_original=0
+__EOF__
+
+  msgInfo 2 "vim-monokai"                                                              
+  git clone https://github.com/sickill/vim-monokai \
+    $VIM_BUNDLE/vim-monokai
+  cat >> $VIMRC << __EOF__
+""" vim-monokai
+"colorscheme monokai
+__EOF__
+
+  msgInfo 2 "vim-airline"
+  git clone https://github.com/vim-airline/vim-airline \
+    $VIM_BUNDLE/vim-airline
+  cat >> $VIMRC << __EOF__
+""" vim-airline
+let g:airline#extensions#tabline#enabled=1
+__EOF__
+
+  msgInfo 2 "nerdtree"
+  git clone https://github.com/scrooloose/nerdtree \
+    $VIM_BUNDLE/nerdtree
+  cat >> $VIMRC << __EOF__
+""" nerdtree
+let NERDTreeShowHidden=1
+__EOF__
+
+  msgInfo 2 "fugitive"
+  git clone https://github.com/tpope/vim-fugitive \
+    $VIM_BUNDLE/vim-fugitive
+  cat >> $VIMRC << __EOF__
+""" vim-fugitive
+__EOF__
+}
+
+runUpdate() {
+
+  msgInfo 0 "Running update"
+  [ ! -d $VIM_BUNDLE ] && msgError "bundle directory not found"
+
+  # locate and update plugins
+  find $VIM_BUNDLE -type d -name '.git' -exec dirname {} \; \
+  | while read plugin_dir; do
+    cd $plugin_dir && git fetch origin && git rebase
+  done
+}
+
+case $1 in
+  install) runInstall ;;
+  update) runUpdate ;;
+  *) echo "Usage: $0 [install|update]" ;;  
+esac
+
+exit 0
