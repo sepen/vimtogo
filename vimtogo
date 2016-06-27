@@ -4,8 +4,10 @@ readonly VIM_HOME="$HOME/.vim"
 readonly VIM_AUTOLOAD="$VIM_HOME/autoload"
 readonly VIM_BUNDLE="$VIM_HOME/bundle"
 readonly VIMRC="$HOME/.vimrc"
+readonly TOGO_DIR="./togo"
 
 CURL_CMD="curl -sSL"
+GIT_CMD="git"
 
 sslNoVerify() {
   CURL_CMD="$CURL_CMD -k"
@@ -63,57 +65,20 @@ execute pathogen#infect()
 call pathogen#helptags()
 __EOF__
 
-  msgInfo 1 "Installing plugins"
+  msgInfo 1 "Installing bundles"
   mkdir -p $VIM_BUNDLE
 
-  # TODO: load a list of plugins from a file, easy to maintain
-  msgInfo 2 "jellybeans"
-  git clone https://github.com/nanotech/jellybeans.vim \
-    $VIM_BUNDLE/jellybeans
-  cat >> $VIMRC << __EOF__
-""" jellybeans
-colorscheme jellybeans
-__EOF__
- 
-  msgInfo 2 "molokai"
-  git clone https://github.com/tomasr/molokai \
-    $VIM_BUNDLE/molokai
-  cat >> $VIMRC << __EOF__
-""" molokai
-"colorscheme molokai
-"let g:molokai_original=0
-__EOF__
-
-  msgInfo 2 "vim-monokai"                                                              
-  git clone https://github.com/sickill/vim-monokai \
-    $VIM_BUNDLE/vim-monokai
-  cat >> $VIMRC << __EOF__
-""" vim-monokai
-"colorscheme monokai
-__EOF__
-
-  msgInfo 2 "vim-airline"
-  git clone https://github.com/vim-airline/vim-airline \
-    $VIM_BUNDLE/vim-airline
-  cat >> $VIMRC << __EOF__
-""" vim-airline
-let g:airline#extensions#tabline#enabled=1
-__EOF__
-
-  msgInfo 2 "nerdtree"
-  git clone https://github.com/scrooloose/nerdtree \
-    $VIM_BUNDLE/nerdtree
-  cat >> $VIMRC << __EOF__
-""" nerdtree
-let NERDTreeShowHidden=1
-__EOF__
-
-  msgInfo 2 "fugitive"
-  git clone https://github.com/tpope/vim-fugitive \
-    $VIM_BUNDLE/vim-fugitive
-  cat >> $VIMRC << __EOF__
-""" vim-fugitive
-__EOF__
+  find $TOGO_DIR -type f \
+  | while read togo_bundle; do
+    name="$(basename $togo_bundle)"
+    # read repo and options from file
+    . $togo_bundle
+    msgInfo 2 "$name"
+    $GIT_CMD clone $repo $VIM_BUNDLE/$name
+    echo
+    echo "\"\"\"$name" >> $VIMRC
+    echo $options >> $VIMRC
+  done
 }
 
 runUpdate() {
@@ -121,10 +86,10 @@ runUpdate() {
   msgInfo 0 "Running update"
   [ ! -d $VIM_BUNDLE ] && msgError "bundle directory not found"
 
-  # locate and update plugins
+  # locate and update bundles
   find $VIM_BUNDLE -type d -name '.git' -exec dirname {} \; \
-  | while read plugin_dir; do
-    cd $plugin_dir && git fetch origin && git rebase
+  | while read bundle_dir; do
+    cd $bundle_dir && $GIT_CMD fetch origin && $GIT_CMD rebase
   done
 }
 
