@@ -57,6 +57,7 @@ set background=dark
 set laststatus=2
 set title
 set colorcolumn=80
+set t_Co=256
 set expandtab
 set tabstop=2
 set shiftwidth=2
