@@ -70,12 +70,11 @@ __EOF__
 
   find $TOGO_DIR -type f \
   | while read togo_bundle; do
-    name="$(basename $togo_bundle)"
+    name="$(basename $togo_bundle .sh)"
     # read repo and options from file
-    . $togo_bundle
+    . "$togo_bundle"
     msgInfo 2 "$name"
     $GIT_CMD clone $repo $VIM_BUNDLE/$name
-    echo
     echo "\"\"\"$name" >> $VIMRC
     echo $options >> $VIMRC
   done
