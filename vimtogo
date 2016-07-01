@@ -4,7 +4,7 @@ readonly VIM_HOME="$HOME/.vim"
 readonly VIM_AUTOLOAD="$VIM_HOME/autoload"
 readonly VIM_BUNDLE="$VIM_HOME/bundle"
 readonly VIMRC="$HOME/.vimrc"
-readonly TOGO_DIR="./togo"
+readonly VIM_TOGO="$(cd $(dirname $0); pwd)/togo"
 
 CURL_CMD="curl -sSL"
 GIT_CMD="git"
@@ -69,7 +69,7 @@ __EOF__
   msgInfo 1 "Installing bundles"
   mkdir -p $VIM_BUNDLE
 
-  find $TOGO_DIR -type f \
+  find $VIM_TOGO -type f \
   | while read togo_bundle; do
     name="$(basename $togo_bundle .sh)"
     # read repo and options from file
