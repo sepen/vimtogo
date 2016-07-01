@@ -1,0 +1,16 @@
+""" general settings
+syntax on
+filetype plugin indent on
+set nocompatible
+set encoding=utf-8
+set number
+set cursorline
+set cursorcolumn
+set background=dark
+set laststatus=2
+set title
+set colorcolumn=80
+set t_Co=256
+set expandtab
+set tabstop=2
+set shiftwidth=2
