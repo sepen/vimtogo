@@ -18,9 +18,9 @@ msgInfo() {
   local level=$1
   shift
   case $level in
-    0) echo "===> $@" ;;
-    1) echo "-> $@ " ;;
-    2) echo "+ $@" ;;
+    0) echo "$@" ;;
+    1) echo "+ $@ " ;;
+    2) echo "-> $@" ;;
   esac
 }
 
@@ -38,13 +38,13 @@ runInstall() {
   msgInfo 0 "Running install"
   [ -d $VIM_BUNDLE ] && msgError "bundle directory found"
 
+  msgInfo 1 "Creating .vimrc file"
+  cat $VIM_TOGO/vimrc > $VIMRC
+
   msgInfo 1 "Installing pathogen"
   mkdir -p $VIM_AUTOLOAD
   $CURL_CMD -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
-
-  msgInfo 1 "Creating .vimrc file"
-  cat $VIM_TOGO/vimrc > $VIMRC
   cat >> $VIMRC << __EOF__
 """ pathogen
 execute pathogen#infect()
@@ -74,7 +74,9 @@ runUpdate() {
   # locate and update bundles
   find $VIM_BUNDLE -type d -name '.git' -exec dirname {} \; \
   | while read bundle_dir; do
-    cd $bundle_dir && $GIT_CMD fetch origin && $GIT_CMD rebase
+    name="$(basename $bundle_dir)"
+    msgInfo 2 "$name"
+    cd $bundle_dir && $GIT_CMD fetch origin && $GIT_CMD pull
   done
 }
 
