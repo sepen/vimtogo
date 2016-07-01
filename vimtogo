@@ -44,23 +44,8 @@ runInstall() {
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
 
   msgInfo 1 "Creating .vimrc file"
-  cat > $VIMRC << __EOF__
-""" general settings
-syntax on
-filetype plugin indent on
-set nocompatible
-set encoding=utf-8
-set number
-set cursorline
-set cursorcolumn
-set background=dark
-set laststatus=2
-set title
-set colorcolumn=80
-set t_Co=256
-set expandtab
-set tabstop=2
-set shiftwidth=2
+  cat $VIM_TOGO/vimrc > $VIMRC
+  cat >> $VIMRC << __EOF__
 """ pathogen
 execute pathogen#infect()
 call pathogen#helptags()
@@ -69,7 +54,7 @@ __EOF__
   msgInfo 1 "Installing bundles"
   mkdir -p $VIM_BUNDLE
 
-  find $VIM_TOGO -type f \
+  find $VIM_TOGO -type f -name '*.sh' \
   | while read togo_bundle; do
     name="$(basename $togo_bundle .sh)"
     # read repo and options from file
