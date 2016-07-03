@@ -6,12 +6,14 @@ readonly VIM_BUNDLE="$VIM_HOME/bundle"
 readonly VIMRC="$HOME/.vimrc"
 readonly VIM_TOGO="$(cd $(dirname $0); pwd)/togo"
 
-CURL_CMD="curl -sSL"
-GIT_CMD="git"
+CMD_CURL="curl -sSL"
+CMD_GIT="git"
+CMD_SED="sed"
+
 OPTION_FORCE=0
 
 sslNoVerify() {
-  CURL_CMD="$CURL_CMD -k"
+  CMD_CURL="$CMD_CURL -k"
   export GIT_SSL_NO_VERIFY=1
 }
 
@@ -35,7 +37,7 @@ msgError(){
 }	
 
 installPathogen() {
-  $CURL_CMD -o $VIM_AUTOLOAD/pathogen.vim \
+  $CMD_CURL -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
   cat >> $VIMRC << __EOF__
 """ pathogen
@@ -45,24 +47,24 @@ __EOF__
 }
 
 installBundle() {
-  local name="$(basename $togo_bundle .sh)"
-  # read repo and options from file
-  . "$togo_bundle"
-  msgInfo 2 "$name"
-  [ $OPTION_FORCE -eq 1 ] && rm -rf $VIM_BUNDLE/$name
-  $GIT_CMD clone $repo $VIM_BUNDLE/$name
-  echo "\"\"\"$name" >> $VIMRC
-  echo $options >> $VIMRC
+  local bundle_file="$1"
+  local bundle_name="$(basename $bundle_file)"
+  local bundle_repo_uri="$($CMD_SED '2!d;s/""" *//' $bundle_file)"
+  msgInfo 2 "$bundle_name"
+  [ $OPTION_FORCE -eq 1 ] && rm -rf $VIM_BUNDLE/$bundle_name
+  $CMD_GIT clone $bundle_repo_uri $VIM_BUNDLE/$bundle_name
+  cat $bundle_file >> $VIMRC
 }
 
 updateBundle() {
-  local name="$(basename $bundle_dir)"
-  msgInfo 2 "$name"
-  cd $bundle_dir && $GIT_CMD fetch origin && $GIT_CMD pull
+  local bundle_dir="$1"
+  local bundle_name="$(basename $bundle_dir)"
+  msgInfo 2 "$bundle_name"
+  cd $bundle_dir && $CMD_GIT fetch origin && $CMD_GIT pull
 }
 
 installBundles() {
-  find $VIM_TOGO -type f -name '*.sh'\
+  find $VIM_TOGO -type f ! -name 'vimrc' \
   | while read togo_bundle; do
     installBundle "$togo_bundle"
   done
@@ -79,8 +81,8 @@ runInstall() {
   msgInfo 0 "Running install"
   while [ "$1" ]; do
     case "$1" in
-      "--ssl-no-verify"|"-k") sslNoVerify ;;
-      "--force"|"-f") enableForce ;;
+      "-k"|"--ssl-no-verify") sslNoVerify ;;
+      "-f"|"--force") enableForce ;;
     esac
     shift
   done
@@ -115,8 +117,8 @@ case $1 in
   *)  echo "Usage: $0 [install|update] <option>"
       echo "Where options for commands are:"
       echo "  install"
-      echo "  --ssl-no-verify, -k   No verify SSL certs for HTTPS connections"
-      echo "  --force, -f           Force installation. This will overwrite exinting files"
+      echo "  -k, --ssl-no-verify   No verify SSL certs for HTTPS connections"
+      echo "  -f, --force           Force installation. This will overwrite exinting files"
       ;;
 esac
 
