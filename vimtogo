@@ -8,10 +8,15 @@ readonly VIM_TOGO="$(cd $(dirname $0); pwd)/togo"
 
 CURL_CMD="curl -sSL"
 GIT_CMD="git"
+OPTION_FORCE=0
 
 sslNoVerify() {
   CURL_CMD="$CURL_CMD -k"
   export GIT_SSL_NO_VERIFY=1
+}
+
+enableForce() {
+  OPTION_FORCE=1
 }
 
 msgInfo() {
@@ -29,20 +34,7 @@ msgError(){
   exit 1
 }	
 
-runInstall() {
-
-  case $1 in
-    "--ssl-no-verify") sslNoVerify ;;
-  esac
-
-  msgInfo 0 "Running install"
-  [ -d $VIM_BUNDLE ] && msgError "bundle directory found"
-
-  msgInfo 1 "Creating .vimrc file"
-  cat $VIM_TOGO/vimrc > $VIMRC
-
-  msgInfo 1 "Installing pathogen"
-  mkdir -p $VIM_AUTOLOAD
+installPathogen() {
   $CURL_CMD -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
   cat >> $VIMRC << __EOF__
@@ -50,40 +42,82 @@ runInstall() {
 execute pathogen#infect()
 call pathogen#helptags()
 __EOF__
+}
 
-  msgInfo 1 "Installing bundles"
-  mkdir -p $VIM_BUNDLE
+installBundle() {
+  local name="$(basename $togo_bundle .sh)"
+  # read repo and options from file
+  . "$togo_bundle"
+  msgInfo 2 "$name"
+  [ $OPTION_FORCE -eq 1 ] && rm -rf $VIM_BUNDLE/$name
+  $GIT_CMD clone $repo $VIM_BUNDLE/$name
+  echo "\"\"\"$name" >> $VIMRC
+  echo $options >> $VIMRC
+}
 
-  find $VIM_TOGO -type f -name '*.sh' \
+updateBundle() {
+  local name="$(basename $bundle_dir)"
+  msgInfo 2 "$name"
+  cd $bundle_dir && $GIT_CMD fetch origin && $GIT_CMD pull
+}
+
+installBundles() {
+  find $VIM_TOGO -type f -name '*.sh'\
   | while read togo_bundle; do
-    name="$(basename $togo_bundle .sh)"
-    # read repo and options from file
-    . "$togo_bundle"
-    msgInfo 2 "$name"
-    $GIT_CMD clone $repo $VIM_BUNDLE/$name
-    echo "\"\"\"$name" >> $VIMRC
-    echo $options >> $VIMRC
+    installBundle "$togo_bundle"
   done
 }
 
-runUpdate() {
-
-  msgInfo 0 "Running update"
-  [ ! -d $VIM_BUNDLE ] && msgError "bundle directory not found"
-
-  # locate and update bundles
+updateBundles() {
   find $VIM_BUNDLE -type d -name '.git' -exec dirname {} \; \
   | while read bundle_dir; do
-    name="$(basename $bundle_dir)"
-    msgInfo 2 "$name"
-    cd $bundle_dir && $GIT_CMD fetch origin && $GIT_CMD pull
+    updateBundle "$bundle_dir"
   done
+}
+
+runInstall() {
+  msgInfo 0 "Running install"
+  while [ "$1" ]; do
+    case "$1" in
+      "--ssl-no-verify"|"-k") sslNoVerify ;;
+      "--force"|"-f") enableForce ;;
+    esac
+    shift
+  done
+
+  if [ -d $VIM_BUNDLE ]; then
+    if [ $OPTION_FORCE -eq 0 ]; then
+      msgError "bundle directory found. Try --force to overwrite and force installation"
+    fi
+  fi
+
+  msgInfo 1 "Creating .vimrc file"
+  cat $VIM_TOGO/vimrc > $VIMRC
+
+  msgInfo 1 "Installing pathogen"
+  mkdir -p $VIM_AUTOLOAD
+  installPathogen
+
+  msgInfo 1 "Installing bundles"
+  mkdir -p $VIM_BUNDLE
+  installBundles
+}
+
+runUpdate() {
+  msgInfo 0 "Running update"
+  [ ! -d $VIM_BUNDLE ] && msgError "bundle directory not found"
+  updateBundles
 }
 
 case $1 in
   install) shift; runInstall $@ ;;
   update) shift; runUpdate $@ ;;
-  *) echo "Usage: $0 [install|update]" ;;  
+  *)  echo "Usage: $0 [install|update] <option>"
+      echo "Where options for commands are:"
+      echo "  install"
+      echo "  --ssl-no-verify, -k   No verify SSL certs for HTTPS connections"
+      echo "  --force, -f           Force installation. This will overwrite exinting files"
+      ;;
 esac
 
 exit 0
