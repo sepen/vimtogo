@@ -1,0 +1,3 @@
+""" greplace
+""" https://github.com/skwp/greplace.vim
+let g:grep_cmd_opts='--line-number'
