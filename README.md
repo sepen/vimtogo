@@ -27,4 +27,5 @@ Where options for commands are:
 My idea is to keep in _master_ branch the most common setup and have a branch for each customization.
 In this way, you can fork my repository and create one branch that meets your needs.  
 Then from time to time you can merge from this upstream repository to your fork.  
-If you need more help about that take a look of this link: <https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/>
+If you need more help about that take a look of this link:  
+<https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/>
