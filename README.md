@@ -3,9 +3,9 @@
 Deploy your custom ViM setup and keep it up to date everywhere.
 
 
-### Quickstart
+## Quickstart
 
-Installation:
+#### Installation
 ```
 git clone https://github.com/sepen/vimtogo
 cd vimtogo
@@ -13,7 +13,7 @@ chmod +x vimtogo
 ./vimtogo install
 ```
 
-Options:
+#### Options
 ```
 Usage: ./vimtogo [install|update] <option>
 Where options for commands are:
@@ -22,7 +22,37 @@ Where options for commands are:
   -f, --force           Force installation. This will overwrite exinting files
 ```
 
-### Customize your setup
+#### Install plugins
+
+For example to add vim-airline plugin to your setup:
+```
+vim togo/vim-airline
+```
+Then put these contents:
+```
+""" vim-airline
+""" https://github.com/vim-airline/vim-airline
+let g:airline#extensions#tabline#enabled=1
+```
+At least you have to put the first two lines which are required:
+* first line indicates the plugin name
+* second one referes to git repo location from where clone and or update sources
+
+After that you can add all desired option settings. For example:
+```
+let g:airline#extensions#tabline#enabled=1
+```
+
+Then run the installation again that will re-install all default plugins and will add vim-airline:
+```
+./vimtogo install --force
+```
+
+To have an example of a complete setup take a look of my own branch:
+<https://github.com/sepen/vimtogo/blob/sepen/togo/>
+
+
+## Customization
 
 My idea is to keep in _master_ branch the most common setup and have a branch for each customization.
 In this way, you can fork my repository and create one branch that meets your needs.  
