@@ -40,6 +40,7 @@ installPathogen() {
   $CMD_CURL -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
   cat >> $VIMRC << __EOF__
+
 """ pathogen
 execute pathogen#infect()
 call pathogen#helptags()
@@ -53,7 +54,7 @@ installBundle() {
   msgInfo 2 "$bundle_name"
   [ $OPTION_FORCE -eq 1 ] && rm -rf $VIM_BUNDLE/$bundle_name
   $CMD_GIT clone $bundle_repo_uri $VIM_BUNDLE/$bundle_name
-  cat $bundle_file >> $VIMRC
+  ( echo && cat $bundle_file ) >> $VIMRC
 }
 
 updateBundle() {
