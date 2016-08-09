@@ -54,6 +54,7 @@ installPathogen() {
   mkdir -p $VIM_AUTOLOAD
   $CMD_CURL -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
+  [ $? -ne 0 ] && msgError "Aborting. Previous executed command failed"
   cat >> $VIMRC << __EOF__
 
 """ pathogen
@@ -69,6 +70,7 @@ installBundle() {
   msgInfo 2 "$bundle_name"
   [ $OPTION_FORCE -eq 1 ] && rm -rf $VIM_BUNDLE/$bundle_name
   $CMD_GIT clone $bundle_repo_uri $VIM_BUNDLE/$bundle_name
+  [ $? -ne 0 ] && msgError "Aborting. Previous executed command failed"
   ( echo && cat $bundle_file ) >> $VIMRC
 }
 
@@ -124,7 +126,7 @@ runInstall() {
   mkdir -p $VIM_BUNDLE
 
   msgInfo 1 "Installing $VIMRC file"
-  cp $VIM_TOGO/vimrc $VIMRC
+  cp -f $VIM_TOGO/vimrc $VIMRC
 
   msgInfo 1 "Installing pathogen"
   installPathogen
