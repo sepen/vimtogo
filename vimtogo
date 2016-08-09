@@ -11,6 +11,7 @@ CMD_GIT="git"
 CMD_SED="sed"
 
 OPTION_FORCE=0
+OPTION_BACKUP=0
 
 sslNoVerify() {
   CMD_CURL="$CMD_CURL -k"
@@ -19,6 +20,10 @@ sslNoVerify() {
 
 enableForce() {
   OPTION_FORCE=1
+}
+
+enableBackup() {
+  OPTION_BACKUP=1
 }
 
 msgInfo() {
@@ -37,6 +42,7 @@ msgError(){
 }	
 
 installPathogen() {
+  mkdir -p $VIM_AUTOLOAD
   $CMD_CURL -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
   cat >> $VIMRC << __EOF__
@@ -84,25 +90,39 @@ runInstall() {
     case "$1" in
       "-k"|"--ssl-no-verify") sslNoVerify ;;
       "-f"|"--force") enableForce ;;
+      "-b"|"--backup") enableBackup ;;
     esac
     shift
   done
 
-  if [ -d $VIM_BUNDLE ]; then
-    if [ $OPTION_FORCE -eq 0 ]; then
-      msgError "bundle directory found. Try --force to overwrite and force installation"
+  if [ $OPTION_BACKUP -eq 1 ]; then
+    if [ -d $VIM_BUNDLE ]; then
+      msgInfo 1 "Backup $VIM_BUNDLE to ${VIM_BUNDLE}.bk"
+      mv -f $VIM_BUNDLE ${VIM_BUNDLE}.bk
+    fi
+    if [ -f $VIMRC ]; then
+      msgInfo 1 "Backup $VIMRC to ${VIMRC}.bk"
+      mv -f $VIMRC ${VIMRC}.bk
+    fi
+  elif [ $OPTION_FORCE -eq 0 ]; then
+    if [ -d $VIM_BUNDLE ]; then
+      msgError "$VIM_BUNDLE directory found. Try --force to overwrite and force installation or --backup to save a copy."
+    fi
+    if [ -f $VIMRC ]; then
+      msgError "$VIMRC file found. Try --force to overwrite and force installation or --backup to save a copy."
     fi
   fi
 
-  msgInfo 1 "Creating .vimrc file"
-  cat $VIM_TOGO/vimrc > $VIMRC
+  msgInfo 1 "Installing $VIM_BUNDLE directory"
+  mkdir -p $VIM_BUNDLE
+
+  msgInfo 1 "Installing $VIMRC file"
+  cp $VIM_TOGO/vimrc $VIMRC
 
   msgInfo 1 "Installing pathogen"
-  mkdir -p $VIM_AUTOLOAD
   installPathogen
 
   msgInfo 1 "Installing bundles"
-  mkdir -p $VIM_BUNDLE
   installBundles
 }
 
@@ -120,6 +140,7 @@ case $1 in
       echo "  install"
       echo "  -k, --ssl-no-verify   No verify SSL certs for HTTPS connections"
       echo "  -f, --force           Force installation. This will overwrite exinting files"
+      echo "  -b, --backup          Save existing stuff by renaming to .bk extension"
       ;;
 esac
 
