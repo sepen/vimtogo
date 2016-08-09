@@ -11,20 +11,9 @@ CMD_GIT="git"
 CMD_SED="sed"
 CMD_TR="tr"
 
-OPTION_FORCE=0
-OPTION_BACKUP=0
-
 sslNoVerify() {
   CMD_CURL="$CMD_CURL -k"
   export GIT_SSL_NO_VERIFY=1
-}
-
-enableForce() {
-  OPTION_FORCE=1
-}
-
-enableBackup() {
-  OPTION_BACKUP=1
 }
 
 msgInfo() {
@@ -94,12 +83,14 @@ updateBundles() {
 }
 
 runInstall() {
+  local OPTION_FORCE=0
+  local OPTION_BACKUP=0
   msgInfo 0 "Running install"
   while [ "$1" ]; do
     case "$1" in
       "-k"|"--ssl-no-verify") sslNoVerify ;;
-      "-f"|"--force") enableForce ;;
-      "-b"|"--backup") enableBackup ;;
+      "-f"|"--force") OPTION_FORCE=1 ;;
+      "-b"|"--backup") OPTION_BACKUP=1 ;;
     esac
     shift
   done
