@@ -20,6 +20,7 @@ Where options for commands are:
   install
   -k, --ssl-no-verify   No verify SSL certs for HTTPS connections
   -f, --force           Force installation. This will overwrite exinting files
+  -b, --backup          Save existing stuff by renaming to .bk extension
 ```
 
 ### Customize your setup
