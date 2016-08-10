@@ -52,8 +52,7 @@ Then run the installation again that will re-install all default plugins and wil
 To have an example of a complete setup take a look of my own branch:  
 <https://github.com/sepen/vimtogo/blob/sepen/togo/>
 
-
-## Customization
+## Customize your own install
 
 My idea is to keep in _master_ branch the most common setup and have a branch for each customization.
 In this way, you can fork my repository and create one branch that meets your needs.  
@@ -61,3 +60,24 @@ Then from time to time you can merge from this upstream repository to your fork.
   
 If you need more help about how to merge upstream changes that take a look of this link:  
 <https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/>
+
+### Create your customization
+
+(Fork)[https://github.com/sepen/vimtogo/fork] this project and create a new branch with your name.
+
+### Merge changes from master branch
+
+From time to time maybe you want to merge from master branch but keep your plugins:
+```
+git merge -s ours origin/master
+```
+
+Then if you want to see differences:
+```
+git diff master
+```
+
+To discard your local changes on a file (or files)
+```
+git checkout master README.md vimtogo
+```
