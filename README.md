@@ -35,9 +35,9 @@ Then put these contents:
 """ https://github.com/vim-airline/vim-airline
 let g:airline#extensions#tabline#enabled=1
 ```
-At least you have to put the first two lines which are required:
-* first line indicates the plugin name
-* second one referes to git repo location from where clone and or update sources
+The two first lines are mandatory, indicating:
+* plugin name
+* git repo location from where clone and or update sources
 
 After that you can add all desired option settings. For example:
 ```
@@ -54,11 +54,11 @@ To have an example of a complete setup take a look of my own branch:
 
 ## Customize your own install
 
-My idea is to keep in _master_ branch the most common setup and have a branch for each customization.
+My idea is to keep the most common setup in _master_ branch and add a branch for each customization.
 In this way, you can fork my repository and create one branch that meets your needs.  
 Then from time to time you can merge from this upstream repository to your fork.  
   
-If you need more help about how to merge upstream changes that take a look of this link:  
+If you need more help on how to merge upstream changes then take a look to this link:  
 <https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/>
 
 ### Create your customization
