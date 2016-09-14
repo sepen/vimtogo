@@ -5,7 +5,7 @@ Deploy your custom ViM setup and keep it up to date everywhere.
 
 ## Quickstart
 
-### Installation
+#### Installation
 ```
 git clone https://github.com/sepen/vimtogo
 cd vimtogo
@@ -13,7 +13,7 @@ chmod +x vimtogo
 ./vimtogo install
 ```
 
-### Usage
+#### Usage
 ```
 Usage: ./vimtogo [install|update] <option>
 Where options for commands are:
@@ -23,7 +23,7 @@ Where options for commands are:
   -b, --backup          Save existing stuff by renaming to .bk extension
 ```
 
-### Install more plugins
+#### Install more plugins
 
 For example to add _vim-airline_ plugin to your setup:
 ```
@@ -55,13 +55,13 @@ To have an example of a complete setup take a look of my own branch:
 
 ## Customization
 
-### Fork the repository
+#### Fork the repository
 
 My idea is to keep the most common setup in _master_ branch and add a branch for each customization.
 In this way, you can [fork](https://help.github.com/articles/fork-a-repo/) my repository and create
 one branch with your name that meets your needs.  
 
-### Merge changes from upstream repository
+#### Merge changes from upstream repository
 
 Then from time to time you can merge upstream changes from my repository to your fork.  
 
@@ -69,7 +69,7 @@ If you need more help on how to fork to merge upstream changes then take a look 
 <https://help.github.com/articles/fork-a-repo/>  
 <https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/>
 
-### Merge changes from master branch
+#### Merge changes from master branch
 
 Also you can merge from master branch but keep some local work (for example your _vimrc_):
 ```
