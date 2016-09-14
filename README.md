@@ -52,22 +52,26 @@ Then run the installation again that will re-install all default plugins and wil
 To have an example of a complete setup take a look of my own branch:  
 <https://github.com/sepen/vimtogo/blob/sepen/togo/>
 
-## Customize your own install
+
+## Customization
+
+### Fork the repository
 
 My idea is to keep the most common setup in _master_ branch and add a branch for each customization.
-In this way, you can fork my repository and create one branch that meets your needs.  
-Then from time to time you can merge from this upstream repository to your fork.  
-  
-If you need more help on how to merge upstream changes then take a look to this link:  
+In this way, you can [fork](https://help.github.com/articles/fork-a-repo/) my repository and create
+one branch with your name that meets your needs.  
+
+### Merge changes from upstream repository
+
+Then from time to time you can merge upstream changes from my repository to your fork.  
+
+If you need more help on how to fork to merge upstream changes then take a look to these links:  
+<https://help.github.com/articles/fork-a-repo/>  
 <https://help.github.com/articles/merging-an-upstream-repository-into-your-fork/>
-
-### Create your customization
-
-(Fork)[https://github.com/sepen/vimtogo/fork] this project and create a new branch with your name.
 
 ### Merge changes from master branch
 
-From time to time maybe you want to merge from master branch but keep your plugins:
+Also you can merge from master branch but keep some local work (for example your _vimrc_):
 ```
 git merge -s ours origin/master
 ```
@@ -77,7 +81,7 @@ Then if you want to see differences:
 git diff master
 ```
 
-To discard your local changes on a file (or files)
+To discard changes on a file
 ```
-git checkout master README.md vimtogo
+git checkout master vimtogo/vimrc
 ```
