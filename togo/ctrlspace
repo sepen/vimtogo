@@ -1,0 +1,4 @@
+""" ctrlspace 
+""" https://github.com/vim-ctrlspace/vim-ctrlspace.git
+set nocompatible
+set hidden

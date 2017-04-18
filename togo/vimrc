@@ -14,3 +14,14 @@ set t_Co=256
 set expandtab
 set tabstop=2
 set shiftwidth=2
+set hlsearch
+set incsearch
+set nrformats=
+set wildmenu
+set wildmode=full
+set path+=$HOME/data/sql/**
+autocmd FileType py,sql autocmd BufWritePre <buffer> %s/\s\+$//e
+nn <F9> mzggg?G`z
+set ignorecase
+set smartcase
+let mapleader = "\<Space>"

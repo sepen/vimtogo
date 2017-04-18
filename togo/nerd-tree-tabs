@@ -1,0 +1,4 @@
+""" nerdtreetabs
+""" https://github.com/jistr/vim-nerdtree-tabs.git
+map <F5> :NERDTreeTabsToggle<CR>
+let NERDTreeIgnore = ['\.pyc$']
