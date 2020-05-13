@@ -15,7 +15,7 @@ chmod +x vimtogo
 
 #### Usage
 ```
-Usage: ./vimtogo [install|update] <option>
+Usage: vimtogo [install|update] <option>
 Where options for commands are:
   install
   -k, --ssl-no-verify   No verify SSL certs for HTTPS connections
