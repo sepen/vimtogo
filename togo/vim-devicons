@@ -1,0 +1,8 @@
+""" vim-devicons
+""" https://github.com/ryanoasis/vim-devicons
+" Linux
+"set guifont=DroidSansMono\ Nerd\ Font\ 11
+" macOS/Windows
+set guifont=DroidSansMono\ Nerd\ Font:h11
+" If you use vim-airline you need this
+let g:airline_powerline_fonts=1

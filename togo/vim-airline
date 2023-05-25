@@ -1,3 +1,6 @@
 """ vim-airline
 """ https://github.com/vim-airline/vim-airline
+" some extensions are loaded twice
+" https://github.com/vim-airline/vim-airline/issues/1300
+let g:airline#extensions#disable_rtp_load=1
 let g:airline#extensions#tabline#enabled=1

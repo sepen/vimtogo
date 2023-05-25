@@ -32,11 +32,11 @@ msgError(){
 }	
 
 findTogoBundles() {
-  find $VIM_TOGO -type f ! -name 'vimrc'
+  find $VIM_TOGO -type f ! -name 'vimrc' | sort -u
 }
 
 findBundles() {
-  find $VIM_BUNDLE -type d -name '.git' -exec dirname {} \;
+  find $VIM_BUNDLE -type d -name '.git' -exec dirname {} \; | sort -u
 }
 
 installPathogen() {
