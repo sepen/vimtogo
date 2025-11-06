@@ -11,28 +11,44 @@ CMD_GIT="git"
 CMD_SED="sed"
 CMD_TR="tr"
 
-sslNoVerify() {
-  CMD_CURL="$CMD_CURL -k"
-  export GIT_SSL_NO_VERIFY=1
-}
+# Define colors
+RED='\033[1;31m'
+GREEN='\033[1;32m'
+BLUE='\033[1;34m'
+BOLD='\033[1m'
+RESET='\033[0m'
 
 msgInfo() {
   local level=$1
   shift
   case $level in
-    0) echo "$@" ;;
-    1) echo "+ $@ " ;;
-    2) echo "-> $@" ;;
+    1)
+      # Step info
+      echo -e "${RESET}${BOLD}${BLUE}$@${RESET}"
+      ;;
+    2)
+      # Sub-step or hint
+      echo -e "${RESET}${BOLD}+${RESET} ${GREEN}$@${RESET}"
+      ;;
+    *)
+      # Plain info
+      echo -e "${RESET}$@${RESET}"
+      ;;
   esac
 }
 
-msgError(){
-  echo "ERROR: $@"
+msgError() {
+  echo -e "${RED}${BOLD}✖ ERROR:${RESET} ${RED}$@${RESET}" >&2
   exit 1
-}	
+}
+
+sslNoVerify() {
+  CMD_CURL="$CMD_CURL -k"
+  export GIT_SSL_NO_VERIFY=1
+}
 
 findTogoBundles() {
-  find $VIM_TOGO -type f ! -name 'vimrc' | sort -u
+  find $VIM_TOGO -type f ! -name 'vimrc' -and ! -name '*.postinstall'
 }
 
 findBundles() {
@@ -40,6 +56,7 @@ findBundles() {
 }
 
 installPathogen() {
+  msgInfo 1 "Installing pathogen"
   mkdir -p $VIM_AUTOLOAD
   $CMD_CURL -o $VIM_AUTOLOAD/pathogen.vim \
     https://raw.github.com/tpope/vim-pathogen/master/autoload/pathogen.vim
@@ -56,27 +73,36 @@ installBundle() {
   local bundle_file="$1"
   local bundle_name="$(basename $bundle_file)"
   local bundle_repo_uri="$($CMD_SED '2!d;s/""" *//' $bundle_file)"
-  msgInfo 2 "$bundle_name"
+  msgInfo 1 "Installing $bundle_name"
   [ $OPTION_FORCE -eq 1 ] && rm -rf $VIM_BUNDLE/$bundle_name
+  msgInfo 2 "Getting source from $bundle_repo_uri"
   $CMD_GIT clone $bundle_repo_uri $VIM_BUNDLE/$bundle_name
-  [ $? -ne 0 ] && msgError "Aborting. Previous executed command failed"
+  [ $? -ne 0 ] && msgError "Aborting. Previous command failed"
   ( echo && cat $bundle_file ) >> $VIMRC
+  if [ -f $bundle_file.postinstall ]; then
+    msgInfo 2 "Running postinstall script"
+    cd $VIM_BUNDLE/$bundle_name && sh -x $bundle_file.postinstall
+  fi
 }
 
 updateBundle() {
   local bundle_dir="$1"
   local bundle_name="$(basename $bundle_dir)"
-  msgInfo 2 "$bundle_name"
+  msgInfo 1 "Updating $bundle_name"
   cd $bundle_dir && $CMD_GIT fetch origin && $CMD_GIT pull
 }
 
 installBundles() {
+  bundles=$(findTogoBundles | $CMD_SED -e "s|$VIM_TOGO/||" | $CMD_TR '\n' ' ')
+  msgInfo 1 "Installing bundles: $bundles"
   findTogoBundles | while read togo_bundle; do
     installBundle "$togo_bundle"
   done
 }
 
 updateBundles() {
+  bundles=$(findTogoBundles | $CMD_SED -e "s|$VIM_TOGO/||" | $CMD_TR '\n' ' ')
+  msgInfo 1 "Update bundles: $bundles"
   findBundles | while read bundle_dir; do
     updateBundle "$bundle_dir"
   done
@@ -85,7 +111,6 @@ updateBundles() {
 runInstall() {
   local OPTION_FORCE=0
   local OPTION_BACKUP=0
-  msgInfo 0 "Running install"
   while [ "$1" ]; do
     case "$1" in
       "-k"|"--ssl-no-verify") sslNoVerify ;;
@@ -96,12 +121,13 @@ runInstall() {
   done
 
   if [ $OPTION_BACKUP -eq 1 ]; then
+    msgInfo 1 "Backup enabled"
     if [ -d $VIM_BUNDLE ]; then
-      msgInfo 1 "Backup $VIM_BUNDLE to ${VIM_BUNDLE}.bk"
+      msgInfo 2 "Copying $VIM_BUNDLE to ${VIM_BUNDLE}.bk"
       mv -f $VIM_BUNDLE ${VIM_BUNDLE}.bk
     fi
     if [ -f $VIMRC ]; then
-      msgInfo 1 "Backup $VIMRC to ${VIMRC}.bk"
+      msgInfo 2 "Copying $VIMRC to ${VIMRC}.bk"
       mv -f $VIMRC ${VIMRC}.bk
     fi
   elif [ $OPTION_FORCE -eq 0 ]; then
@@ -119,16 +145,12 @@ runInstall() {
   msgInfo 1 "Installing $VIMRC file"
   cp -f $VIM_TOGO/vimrc $VIMRC
 
-  msgInfo 1 "Installing pathogen"
   installPathogen
 
-  bundles=$(findTogoBundles | $CMD_SED -e "s|$VIM_TOGO/||" | $CMD_TR '\n' ' ')
-  msgInfo 1 "Installing bundles: $bundles"
   installBundles
 }
 
 runUpdate() {
-  msgInfo 0 "Running update"
   [ ! -d $VIM_BUNDLE ] && msgError "bundle directory not found"
   updateBundles
 }
